@@ -87,8 +87,8 @@ function getCoordMap(mapId: string = 'vidar') {
 }
 
 function getHeatMap(
-  el: string,
-  dimensions: IDimensions,
+  el?: string,
+  dimensions?: IDimensions,
   mapIds: string[] = ['vidar'],
   screenSize?: string
 ) {
@@ -111,10 +111,51 @@ function getHeatMap(
     .map((x) => +x)
 
   const canvas = document.createElement('canvas')
-  canvas.width = sw
-  canvas.height = sh
+
+  if (dimensions && (dimensions.maxWidth || dimensions.maxHeight)) {
+    const sr = sw / sh
+    const srr = sh / sw
+
+    if (!dimensions.maxWidth) {
+      dimensions.maxWidth = 0
+    }
+
+    if (dimensions.maxHeight) {
+      dimensions.maxHeight = 0
+    }
+    dimensions.width = dimensions.maxWidth
+    const smallestDimension =
+      dimensions.maxWidth > dimensions.maxHeight!
+        ? dimensions.maxHeight
+        : dimensions.maxWidth
+
+    if (sr === 1) {
+      dimensions.width = smallestDimension
+      dimensions.height = smallestDimension
+    } else if (sr > 1 && dimensions.maxWidth) {
+      dimensions.width = dimensions.maxWidth
+      dimensions.height = dimensions.maxWidth * srr
+    } else if (dimensions.maxHeight) {
+      dimensions.height = dimensions.maxHeight
+      dimensions.width = dimensions.maxHeight * sr
+    } else {
+      dimensions.width = dimensions.maxWidth
+      dimensions.height = dimensions.maxWidth * srr
+    }
+  }
+
+  canvas.width = dimensions?.width ? dimensions.width : sw
+  canvas.height = dimensions?.height ? dimensions.height : sh
 
   const context = canvas.getContext('2d')
+  let wr = 0,
+    hr = 0
+
+  if (dimensions) {
+    wr = dimensions.width! / sw
+    hr = dimensions.height! / sh
+  }
+
   context?.clearRect(0, 0, canvas.width, canvas.height)
 
   const totalCoords = coordMap[screenSize].length
@@ -127,7 +168,11 @@ function getHeatMap(
     coordMap = (window as any)[id]
 
     for (let i = 0; i < totalCoords; i++) {
-      const [x, y] = coordMap[screenSize][i]
+      let [x, y] = coordMap[screenSize][i]
+      if (dimensions) {
+        x = x * wr
+        y = y * hr
+      }
       context!.fillStyle = `rgba(0,0,0, ${alpha})`
       context?.beginPath()
       context?.arc(x, y, 10, 0, 2 * Math.PI)
@@ -176,6 +221,6 @@ function getHeatMap(
   context?.putImageData(imageData!, 0, 0)
 
   const output = canvas?.toDataURL('image/png')
-  document.querySelector(el)!.innerHTML = `<img src=${output} />`
+  document.querySelector(el!)!.innerHTML = `<img src=${output} />`
   return output
 }
