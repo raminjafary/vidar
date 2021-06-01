@@ -12,7 +12,7 @@ function draw() {
 
 draw()
 
-document.getElementById('canvas').onmousemove = function (e) {
+document.querySelector('canvas').onmousemove = function (e) {
   rawData.add([e.layerX, e.layerY, 1])
   window.requestAnimationFrame(draw)
 }
