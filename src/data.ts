@@ -8,5 +8,8 @@ export function getData(points: number[][]) {
     clear() {
       data = []
     },
+    get points() {
+      return data
+    },
   }
 }
