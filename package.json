@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "dev": "yarn build && ts-node -P playground/tsconfig.json playground/server.ts",
+    "dev": "yarn build && ts-node -P playground/tsconfig.json playground/server/server.ts",
     "lint": "eslint --ext .ts,.js,.json .",
     "lint:fix": "yarn lint --fix",
     "prepublish": "yarn build",

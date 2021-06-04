@@ -1,4 +1,4 @@
-const data = [
+export default [
   [38, 20, 2],
   [38, 690, 3],
   [48, 30, 1],
