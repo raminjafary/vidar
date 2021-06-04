@@ -28,7 +28,6 @@ export function canvas2dRenderer(this: any, canvas: HTMLCanvasElement) {
       if (typeof document != 'undefined') {
         return document.createElement('canvas')
       }
-      // return new canvas.constructor()
     },
     setRadius(rad: number, blur: number = 15) {
       const circle = this.createCanvas()
@@ -72,7 +71,7 @@ export function canvas2dRenderer(this: any, canvas: HTMLCanvasElement) {
 
       return data
     },
-    colorize(pixels: any, gradient: any) {
+    colorize(pixels: Uint8ClampedArray, gradient: any) {
       for (let pixel = 0; pixel < pixels.length; pixel += 4) {
         const offset = pixels[pixel + 3] * 4
 
@@ -83,7 +82,7 @@ export function canvas2dRenderer(this: any, canvas: HTMLCanvasElement) {
         }
       }
     },
-    draw(minOpacity: number, data: []) {
+    draw(minOpacity: number, data: number[][]) {
       const grad = this.setGradient(config.defaultGradient)
       const { circle, r } = this.setRadius(
         config.defaultRadius,
@@ -106,6 +105,9 @@ export function canvas2dRenderer(this: any, canvas: HTMLCanvasElement) {
       const pixels = context!.getImageData(0, 0, width, height)
       this.colorize(pixels.data, grad)
       context?.putImageData(pixels, 0, 0)
+    },
+    toDataUrl() {
+      return canvas.toDataURL('image/png')
     },
   }
 }
