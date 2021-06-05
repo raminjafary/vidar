@@ -23,3 +23,13 @@ document.addEventListener('visibilitychange', function send() {
     navigator.sendBeacon('http://localhost:4000', JSON.stringify(sampleData))
   }
 })
+
+document.querySelector('button').onclick = function render() {
+  const parent = document.querySelector('.render')
+  if (parent.firstChild) {
+    parent.removeChild(parent.firstChild)
+  }
+  html2canvas(document.body).then((canvas) => {
+    parent.appendChild(canvas)
+  })
+}

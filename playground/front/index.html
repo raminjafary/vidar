@@ -9,7 +9,24 @@
             height: 600px;
             margin: 0 auto;
             position: relative;
-            border: 1px solid #ccc;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .render {
+            position: absolute;
+            left: 0%;
+            transform: translateX(-50%);
+        }
+
+        button {
+            margin: 24px auto;
+            display: block;
         }
     </style>
 </head>
@@ -17,9 +34,19 @@
 <body>
     <div class="container">
         <canvas id="canvas" width="1000" height="600"></canvas>
-    </div>
+        <form>
+            <label for="fname">First name:</label><br>
+            <input type="text" id="fname" name="fname" value="John"><br>
+            <label for="lname">Last name:</label><br>
+            <input type="text" id="lname" name="lname" value="Doe"><br><br>
+            <input type="submit" value="Submit">
+        </form>
 
+    </div>
+    <button>Render heatmap:</button>
+    <div class="render"> </div>
     <script src="../../dist/perf.js"></script>
+    <script src="http://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script type="module" src="./perf.js"></script>
 </body>
 
