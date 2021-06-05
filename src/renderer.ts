@@ -40,14 +40,10 @@ export function canvas2dRenderer(this: any, canvas: HTMLCanvasElement) {
       const r = rad + blur
 
       circle!.width = circle!.height = r * 2
-      // context!.shadowOffsetX = context!.shadowOffsetY = r * 2
-      // context!.shadowBlur = blur
-      // context!.shadowColor = 'black'
 
       context!.filter = 'blur(5px)'
       context!.fillStyle = `rgba(0,0,0, ${1})`
       context!.beginPath()
-      // ctx!.arc(-r2, -r2, r, 0, 2 * Math.PI, true)
       context!.arc(r, r, rad, 0, 2 * Math.PI, true)
       context!.closePath()
       context!.fill()
