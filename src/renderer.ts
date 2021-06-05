@@ -2,6 +2,11 @@ import config from './config.js'
 
 type CanvasOrClass = string | HTMLCanvasElement
 type Dict<T> = { [key: string]: T }
+type IOptions = {
+  minOpacity: number
+  radius: number
+  blur: number
+}
 
 export function canvas2dRenderer(this: any, canvas: HTMLCanvasElement) {
   if (!(this instanceof canvas2dRenderer))
@@ -82,11 +87,14 @@ export function canvas2dRenderer(this: any, canvas: HTMLCanvasElement) {
         }
       }
     },
-    draw(minOpacity: number, data: number[][]) {
-      const grad = this.setGradient(config.defaultGradient)
+    draw(options: IOptions, data: number[][]) {
+      const { minOpacity, radius, blur } = options
+
+      const grad = this.setGradient(minOpacity || config.defaultGradient)
+
       const { circle, r } = this.setRadius(
-        config.defaultRadius,
-        config.defaultBlur
+        radius || config.defaultRadius,
+        blur || config.defaultBlur
       )
 
       context?.clearRect(0, 0, width, height)
@@ -106,8 +114,8 @@ export function canvas2dRenderer(this: any, canvas: HTMLCanvasElement) {
       this.colorize(pixels.data, grad)
       context?.putImageData(pixels, 0, 0)
     },
-    toDataUrl() {
-      return canvas.toDataURL('image/png')
+    toDataUrl(mimeType = 'image/png') {
+      return canvas.toDataURL(mimeType)
     },
   }
 }
