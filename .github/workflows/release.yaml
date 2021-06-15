@@ -1,0 +1,17 @@
+name: release
+
+on:
+  push:
+    tags:
+      - v*
+  pull_request:
+    tags:
+      - v*
+
+jobs:
+  tagged-release:
+    name: "Release"
+    runs-on: 'ubuntu-latest'
+
+    steps:
+      
