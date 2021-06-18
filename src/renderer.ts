@@ -38,7 +38,11 @@ export class Canvas2dRenderer {
     this.points.push(points)
   }
 
-  resize() {
+  clearData() {
+    this.data = []
+  }
+
+  resizeCanvas() {
     this.width = this.canvas.width
     this.height = this.canvas.height
   }
