@@ -1,5 +1,5 @@
 import sampleData from './data.js'
-import { Canvas2dRenderer } from '../../dist/renderer.js'
+import { Canvas2dRenderer } from '../../dist/index.js'
 
 const heatmap = new Canvas2dRenderer('canvas')
 heatmap.data = sampleData
