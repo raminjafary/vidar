@@ -1,117 +1,133 @@
 import config from './config.js'
+export class Canvas2dRenderer {
+  static instance: Canvas2dRenderer
+  private width!: number
+  private height!: number
+  private max!: number
+  private context!: CanvasRenderingContext2D
+  private circle!: HTMLCanvasElement
+  private radius!: number
+  private gradient!: Uint8ClampedArray
+  private minOpacity!: number
+  private points: number[][] = [[]]
 
-type CanvasOrClass = string | HTMLCanvasElement
-type Dict<T> = { [key: string]: T }
-type IOptions = {
-  minOpacity: number
-  radius: number
-  blur: number
-}
+  constructor(private canvas: HTMLCanvasElement) {
+    if (Canvas2dRenderer.instance) {
+      return Canvas2dRenderer.instance
+    }
 
-export function canvas2dRenderer(this: any, canvas: HTMLCanvasElement) {
-  if (!(this instanceof canvas2dRenderer))
-    return new (canvas2dRenderer as any)(canvas)
+    this.canvas = this.createCanvas(canvas)
+    this.context = this.canvas.getContext('2d') as CanvasRenderingContext2D
+    this.width = this.canvas.width
+    this.height = this.canvas.height
+    this.max = 18
 
-  const canvasFactory = {
-    string: (el: string) => document.querySelector(el) as HTMLCanvasElement,
-    object: (el: HTMLCanvasElement) => el,
-    _: () => document.createElement('canvas') as HTMLCanvasElement,
-  } as Dict<(el?: CanvasOrClass) => HTMLCanvasElement>
+    Canvas2dRenderer.instance = this
+    return this
+  }
 
-  canvas = !canvas ? canvasFactory['_']() : canvasFactory[typeof canvas](canvas)
-  const context = canvas.getContext('2d')
-  let width = canvas.width
-  let height = canvas.height
-  const max = 18
+  get data() {
+    return this.points
+  }
 
-  return {
-    resize() {
-      width = canvas.width
-      height = canvas.height
-    },
-    createCanvas() {
-      if (typeof document != 'undefined') {
-        return document.createElement('canvas')
+  set data(points: number[][]) {
+    this.points = points
+  }
+
+  addData(points: number[]) {
+    this.points.push(points)
+  }
+
+  resize() {
+    this.width = this.canvas.width
+    this.height = this.canvas.height
+  }
+  createCanvas(canvas: HTMLCanvasElement | string = '') {
+    if (!canvas) {
+      return document.createElement('canvas')
+    } else if (canvas && typeof canvas === 'string') {
+      return document.querySelector(canvas) as HTMLCanvasElement
+    } else {
+      return canvas as HTMLCanvasElement
+    }
+  }
+  setRadius(rad: number, blur: number = 15) {
+    this.circle = this.createCanvas()
+    const context = this.circle.getContext('2d') as CanvasRenderingContext2D
+    this.radius = rad + blur
+
+    this.circle.width = this.circle.height = this.radius * 2
+
+    context.filter = 'blur(5px)'
+    context.fillStyle = `rgba(0,0,0, ${1})`
+    context.beginPath()
+    context.arc(this.radius, this.radius, rad, 0, 2 * Math.PI, true)
+    context.closePath()
+    context.fill()
+
+    return this
+  }
+  setGradient(grad: any) {
+    const canvas = this.createCanvas()
+    const context = canvas.getContext('2d') as CanvasRenderingContext2D
+
+    const gradient = context.createLinearGradient(0, 0, 0, 256)
+
+    canvas.width = 1
+    canvas.height = 256
+
+    for (const color in grad) {
+      gradient.addColorStop(+color, grad[color])
+    }
+    context.fillStyle = gradient
+    context.fillRect(0, 0, 1, 256)
+
+    this.gradient = context.getImageData(0, 0, 1, 256).data
+
+    return this
+  }
+  colorize(pixels: Uint8ClampedArray, gradient: any) {
+    for (let pixel = 0; pixel < pixels.length; pixel += 4) {
+      const offset = pixels[pixel + 3] * 4
+
+      if (offset) {
+        pixels[pixel] = gradient[offset]
+        pixels[pixel + 1] = gradient[offset + 1]
+        pixels[pixel + 2] = gradient[offset + 2]
       }
-    },
-    setRadius(rad: number, blur: number = 15) {
-      const circle = this.createCanvas()
-      const context = circle!.getContext('2d')
-      const r = rad + blur
+    }
+  }
+  draw() {
+    if (!this.circle) {
+      this.setRadius(config.defaultRadius, config.defaultBlur)
+    }
 
-      circle!.width = circle!.height = r * 2
+    if (!this.gradient) {
+      this.setGradient(config.defaultGradient)
+    }
 
-      context!.filter = 'blur(5px)'
-      context!.fillStyle = `rgba(0,0,0, ${1})`
-      context!.beginPath()
-      context!.arc(r, r, rad, 0, 2 * Math.PI, true)
-      context!.closePath()
-      context!.fill()
+    this.context?.clearRect(0, 0, this.width, this.height)
 
-      return {
-        r,
-        circle,
-      }
-    },
-    setGradient(grad: any) {
-      const canvas = this.createCanvas()
-      const context = canvas!.getContext('2d')
+    for (let i = 0; i < this.points.length; i++) {
+      const p = this.points[i]
 
-      const gradient = context!.createLinearGradient(0, 0, 0, 256)
-
-      canvas!.width = 1
-      canvas!.height = 256
-
-      for (const color in grad) {
-        gradient!.addColorStop(+color, grad[color])
-      }
-      context!.fillStyle = gradient
-      context!.fillRect(0, 0, 1, 256)
-
-      const data = context?.getImageData(0, 0, 1, 256).data
-
-      return data
-    },
-    colorize(pixels: Uint8ClampedArray, gradient: any) {
-      for (let pixel = 0; pixel < pixels.length; pixel += 4) {
-        const offset = pixels[pixel + 3] * 4
-
-        if (offset) {
-          pixels[pixel] = gradient[offset]
-          pixels[pixel + 1] = gradient[offset + 1]
-          pixels[pixel + 2] = gradient[offset + 2]
-        }
-      }
-    },
-    draw(options: IOptions, data: number[][]) {
-      const { minOpacity, radius, blur } = options
-
-      const grad = this.setGradient(minOpacity || config.defaultGradient)
-
-      const { circle, r } = this.setRadius(
-        radius || config.defaultRadius,
-        blur || config.defaultBlur
+      this.context.globalAlpha = Math.min(
+        Math.max(p[2] / this.max, !this.minOpacity ? 0.05 : this.minOpacity),
+        1
       )
 
-      context?.clearRect(0, 0, width, height)
+      this.context?.drawImage(
+        this.circle,
+        p[0] - this.radius,
+        p[1] - this.radius
+      )
+    }
 
-      for (let i = 0; i < data.length; i++) {
-        const p = data[i]
-
-        context!.globalAlpha = Math.min(
-          Math.max(p[2] / max, !minOpacity ? 0.05 : minOpacity),
-          1
-        )
-
-        context?.drawImage(circle!, p[0] - r, p[1] - r)
-      }
-
-      const pixels = context!.getImageData(0, 0, width, height)
-      this.colorize(pixels.data, grad)
-      context?.putImageData(pixels, 0, 0)
-    },
-    toDataUrl(mimeType = 'image/png') {
-      return canvas.toDataURL(mimeType)
-    },
+    const pixels = this.context.getImageData(0, 0, this.width, this.height)
+    this.colorize(pixels.data, this.gradient)
+    this.context?.putImageData(pixels, 0, 0)
+  }
+  toDataUrl(mimeType = 'image/png') {
+    return this.canvas.toDataURL(mimeType)
   }
 }

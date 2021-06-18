@@ -1,21 +1,23 @@
 import sampleData from './data.js'
-import { getData } from '../../dist/data.js'
-import { canvas2dRenderer } from '../../dist/renderer.js'
+import { Canvas2dRenderer } from '../../dist/renderer.js'
 
-const rawData = getData(sampleData)
-const heat = canvas2dRenderer('canvas')
+const heatmap = new Canvas2dRenderer('canvas')
+heatmap.data = sampleData
+
+let frame = null
 
 function draw() {
   console.time('draw')
-  heat.draw(null, sampleData)
+  heatmap.draw()
   console.timeEnd('draw')
+  frame = null
 }
 
 draw()
 
 document.querySelector('canvas').onmousemove = function (e) {
-  rawData.add([e.layerX, e.layerY, 1])
-  window.requestAnimationFrame(draw)
+  heatmap.addData([e.layerX, e.layerY, 1])
+  frame = frame || window.requestAnimationFrame(draw)
 }
 
 document.addEventListener('visibilitychange', function send() {
