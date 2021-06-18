@@ -16,6 +16,7 @@
   ],
   "scripts": {
     "build": "rm -rf dist && tsc",
+    "dev": "yarn dev:front",
     "dev:server": "yarn build && ts-node -P playground/tsconfig.json playground/server/server.ts",
     "dev:front": "yarn build && npx live-server --open=playground/front",
     "lint": "eslint --ext .ts,.js,.json .",
