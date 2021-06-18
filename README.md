@@ -1,4 +1,7 @@
 <h1 align="center">vidar</h1>
+<div align="center">
+<a href="https://www.npmjs.com/package/@raminjafary/vidar"><img src="https://badgen.net/npm/v/@raminjafary/vidar" alt="Version"></a>
+</div>
 
 <p align="center"><strong>Generate high-performance heatmap.</strong></p>
 
