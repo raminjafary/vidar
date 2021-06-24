@@ -19,6 +19,18 @@ const heatmap = new Canvas2dRenderer(canvas);
 // draw the heatmap
 heatmap.draw();
 ```
+#### Rate limit rendering 
+
+You can throttle rendering per frames based on available resources. In the following example, the `draw` function will always be called with the latest data points with the frame rates browsers provide (e.g. 20 calls on 20fps).
+
+```js
+// throttle draw
+const frame = ensureAvailableFrames(heatmap.draw)
+// run on available frame, pass any args if you have
+frame.request()
+// cancel a frame
+frame.cancel()
+```
 
 #### Data
 
